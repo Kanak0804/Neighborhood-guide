@@ -24,6 +24,7 @@ export default function Navigation() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   
@@ -31,6 +32,9 @@ export default function Navigation() {
 
   useEffect(() => {
     setMounted(true);
+    if (localStorage.getItem('localite_logged_in') === 'true') {
+      setIsLoggedIn(true);
+    }
     
     const handleClickOutside = (event: MouseEvent) => {
       if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
@@ -42,6 +46,8 @@ export default function Navigation() {
   }, []);
 
   const handleLoginSuccess = async () => {
+    localStorage.setItem('localite_logged_in', 'true');
+    setIsLoggedIn(true);
     try {
       const res = await fetch('https://ipapi.co/json/');
       const data = await res.json();
@@ -128,12 +134,24 @@ export default function Navigation() {
               </button>
             )}
             
-            <button
-              onClick={() => setIsLoginOpen(true)}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-foreground text-background dark:bg-white dark:text-black rounded-full text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm ml-0.5 sm:ml-1 whitespace-nowrap"
-            >
-              {t('nav.login')}
-            </button>
+            {mounted && isLoggedIn ? (
+              <button
+                onClick={() => {
+                  localStorage.removeItem('localite_logged_in');
+                  setIsLoggedIn(false);
+                }}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500/10 text-red-500 rounded-full text-xs sm:text-sm font-semibold hover:bg-red-500/20 transition-colors shadow-sm ml-0.5 sm:ml-1 whitespace-nowrap"
+              >
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsLoginOpen(true)}
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-foreground text-background dark:bg-white dark:text-black rounded-full text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm ml-0.5 sm:ml-1 whitespace-nowrap"
+              >
+                {t('nav.login')}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -141,7 +159,7 @@ export default function Navigation() {
     <LoginModal 
       isOpen={isLoginOpen} 
       onClose={() => setIsLoginOpen(false)} 
-      onSuccess={handleLoginSuccess} 
+      onLoginSuccess={handleLoginSuccess} 
     />
     </>
   );

@@ -15,6 +15,11 @@ export default function AIChatbox() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const isMutedRef = useRef(isMuted);
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -61,17 +66,16 @@ export default function AIChatbox() {
     }
 
     try {
-      // Craft a system prompt to guide the AI's behavior
-      const systemPrompt = `You are Localite AI, a highly intelligent, friendly travel and local exploration assistant. 
-Keep your answers direct, helpful, and very concise (maximum 2-3 sentences). Do not use markdown. 
-User asks: ${query}`;
-
-      // Call the free, no-auth LLM endpoint (Pollinations AI)
-      const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(systemPrompt)}`);
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
       
       if (res.ok) {
-        const text = await res.text();
-        return text;
+        const data = await res.json();
+        if (data.reply) return data.reply;
+        throw new Error('No reply in response');
       } else {
         throw new Error('API Error');
       }
@@ -104,6 +108,13 @@ User asks: ${query}`;
           type: 'bot',
           content: botResponse
         }]);
+        
+        // Speak the response if not muted
+        if (!isMutedRef.current && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel(); // Stop current speech
+          const utterance = new SpeechSynthesisUtterance(botResponse);
+          window.speechSynthesis.speak(utterance);
+        }
       }, 1200);
     });
   };
@@ -177,7 +188,13 @@ User asks: ${query}`;
               </div>
               <div className="relative z-10 flex items-center gap-1">
                 <button 
-                  onClick={() => setIsMuted(!isMuted)}
+                  onClick={() => {
+                    const newMuted = !isMuted;
+                    setIsMuted(newMuted);
+                    if (newMuted && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                      window.speechSynthesis.cancel();
+                    }
+                  }}
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-transparent hover:bg-white/10 transition-colors text-white"
                   title={isMuted ? "Unmute Voice" : "Mute Voice"}
                 >
