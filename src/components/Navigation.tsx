@@ -57,24 +57,24 @@ export default function Navigation() {
   return (
     <>
     <nav className="sticky top-0 z-40 glassmorphism border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0 flex items-center">
-            <a href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-accent to-purple-500 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all">
-                <MapPin className="w-5 h-5 text-white" />
+            <a href="/" className="flex items-center gap-1.5 sm:gap-2 group">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-tr from-accent to-purple-500 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-xl font-sora font-bold tracking-tight text-foreground dark:text-white">
+              <span className="text-lg sm:text-xl font-sora font-bold tracking-tight text-foreground dark:text-white">
                 Localite<span className="text-accent">.</span>
               </span>
             </a>
           </div>
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <Link href="/map" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden sm:block">
+          <div className="flex items-center space-x-1 sm:space-x-4">
+            <Link href="/map" className="p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors hidden sm:block">
               <Map className="w-5 h-5 text-foreground" />
             </Link>
-            <Link href="/favorites" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
-              <Heart className="w-5 h-5 text-foreground" />
+            <Link href="/favorites" className="p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative">
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
               {favorites.length > 0 && (
                 <span className="absolute top-1 right-1 bg-accent text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
                   {favorites.length}
@@ -85,10 +85,10 @@ export default function Navigation() {
             <div className="relative" ref={langDropdownRef}>
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-1.5 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex items-center gap-1.5 p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title={t('nav.select_language')}
               >
-                <Globe className="w-5 h-5 text-foreground" />
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
                 <span className="text-xs font-semibold hidden sm:block">{language}</span>
               </button>
 
@@ -121,16 +121,16 @@ export default function Navigation() {
             {mounted && (
               <button 
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ml-1"
+                className="p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ml-0.5 sm:ml-1"
                 title="Toggle Theme"
               >
-                {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-gray-700" />}
+                {theme === 'dark' ? <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />}
               </button>
             )}
             
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="px-4 py-2 bg-foreground text-background dark:bg-white dark:text-black rounded-full text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm ml-1 whitespace-nowrap"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-foreground text-background dark:bg-white dark:text-black rounded-full text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm ml-0.5 sm:ml-1 whitespace-nowrap"
             >
               {t('nav.login')}
             </button>

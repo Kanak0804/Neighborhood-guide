@@ -110,13 +110,24 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Clear the persisted search on reload so it defaults to the hero screen
-    useFilterStore.getState().setSearchQuery('');
-    
-    // Force scroll to top on reload
+    // Force scroll to top on reload and handle state persistence
     if (typeof window !== 'undefined') {
+      const navEntries = performance.getEntriesByType("navigation");
+      const isReload = navEntries.length > 0 && (navEntries[0] as PerformanceNavigationTiming).type === 'reload';
+      
+      if (isReload) {
+        useFilterStore.getState().setSearchQuery('');
+      } else {
+        const persistedQuery = useFilterStore.getState().searchQuery;
+        if (persistedQuery && !searchedArea) {
+          setSearchInput(persistedQuery);
+          // Don't push state here as we are restoring it, just fetch
+          fetchSummary(persistedQuery);
+        }
+      }
+
       window.history.scrollRestoration = 'manual';
-      window.scrollTo(0, 0);
+      if (isReload) window.scrollTo(0, 0);
     }
 
     const handleLoginLocation = (e: any) => {
@@ -135,7 +146,6 @@ export default function Home() {
       } else {
         setSearchedArea('');
         setSummary('');
-        setSearchInput('');
       }
     };
     
@@ -243,31 +253,31 @@ export default function Home() {
             </motion.h1>
             
             <motion.div 
-              className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-2 shadow-2xl mx-auto max-w-2xl"
+              className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-1.5 sm:p-2 shadow-2xl mx-auto w-full max-w-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <MapPin className="text-white/70 ml-4 w-6 h-6" />
+              <MapPin className="text-white/70 ml-2 sm:ml-4 w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
               <input 
                 ref={inputRef}
                 type="text" 
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1 bg-transparent px-4 py-3 outline-none text-white text-lg font-inter placeholder-white/50"
+                className="flex-1 min-w-0 bg-transparent px-2 sm:px-4 py-2 sm:py-3 outline-none text-white text-base sm:text-lg font-inter placeholder-white/50"
                 placeholder={t('hero.search.placeholder')}
               />
               <button
                 onClick={handleLiveLocation}
                 title="Use my current location"
-                className="text-white/70 hover:text-white transition-colors px-3 border-r border-white/20 mr-2"
+                className="text-white/70 hover:text-white transition-colors px-2 sm:px-3 border-r border-white/20 mr-1 sm:mr-2 flex-shrink-0"
               >
-                <LocateFixed className="w-5 h-5" />
+                <LocateFixed className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button 
                 onClick={handleSearch}
-                className="bg-accent text-white px-8 py-3 rounded-full font-medium hover:bg-accent/90 transition-colors flex items-center gap-2 shadow-[0_0_8px_rgba(255,111,97,0.25)]"
+                className="bg-accent text-white px-4 sm:px-8 py-2 sm:py-3 rounded-full font-medium hover:bg-accent/90 transition-colors flex items-center justify-center gap-2 shadow-[0_0_8px_rgba(255,111,97,0.25)] flex-shrink-0"
               >
                 <Search className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('hero.search.btn')}</span>
@@ -326,7 +336,6 @@ export default function Home() {
                   onClick={() => {
                     setSearchedArea('');
                     setSummary('');
-                    setSearchInput('');
                     window.history.pushState({}, '', '/');
                   }}
                   className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-accent transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md"
@@ -339,26 +348,27 @@ export default function Home() {
                 <p className="text-gray-600 dark:text-gray-400 font-inter text-lg mb-8">
                   {t('dash.exploring') || "Currently exploring"} <strong className="text-foreground dark:text-white">{searchedArea}</strong>
                 </p>
-              <div className="flex items-center bg-black/40 dark:bg-black/60 backdrop-blur-xl border border-gray-300 dark:border-white/10 rounded-full p-2 shadow-2xl mx-auto max-w-2xl group focus-within:border-accent/50 focus-within:shadow-[0_0_20px_rgba(255,111,97,0.2)] transition-all">
-                <Search className="text-gray-500 dark:text-gray-400 ml-4 w-5 h-5" />
+              <div className="flex items-center bg-black/40 dark:bg-black/60 backdrop-blur-xl border border-gray-300 dark:border-white/10 rounded-full p-1.5 sm:p-2 shadow-2xl mx-auto w-full max-w-2xl group focus-within:border-accent/50 focus-within:shadow-[0_0_20px_rgba(255,111,97,0.2)] transition-all">
+                <Search className="text-gray-500 dark:text-gray-400 ml-2 sm:ml-4 w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                 <input 
                   ref={dashInputRef}
                   type="text" 
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="flex-1 bg-transparent px-4 py-2 outline-none text-foreground text-lg font-inter placeholder-gray-500 dark:placeholder-gray-400"
+                  className="flex-1 min-w-0 bg-transparent px-2 sm:px-4 py-2 outline-none text-foreground text-base sm:text-lg font-inter placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder={t('dash.search.ph') || "Search or ask AI..."}
                 />
                 <button
                   onClick={handleLiveLocation}
-                  className="text-gray-500 hover:text-accent transition-colors px-3 mr-2"
+                  title="Use my current location"
+                  className="text-gray-500 hover:text-accent dark:hover:text-white transition-colors px-2 sm:px-3 border-r border-gray-300 dark:border-white/20 mr-1 sm:mr-2 flex-shrink-0"
                 >
-                  <LocateFixed className="w-5 h-5" />
+                  <LocateFixed className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button 
                   onClick={handleSearch}
-                  className="bg-accent text-white p-3 rounded-full hover:bg-accent/90 transition-all hover:scale-105 shadow-[0_0_10px_rgba(255,111,97,0.4)]"
+                  className="bg-accent text-white p-2 sm:p-3 rounded-full hover:bg-accent/90 transition-all hover:scale-105 shadow-[0_0_10px_rgba(255,111,97,0.4)] flex-shrink-0"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
