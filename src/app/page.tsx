@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { MapPin, Utensils, Coffee, BedDouble, Trees, ShoppingBag, Landmark, Ticket, Search, LocateFixed, Star, ThumbsUp, Map as MapIcon, ChevronRight } from 'lucide-react';
+import { MapPin, Utensils, Coffee, BedDouble, Trees, ShoppingBag, Landmark, Ticket, Search, LocateFixed, Star, ThumbsUp, Map as MapIcon, ChevronRight, ChevronLeft } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { useFilterStore } from '@/store/useFilterStore';
 import { useTranslation } from '@/i18n/TranslationContext';
@@ -37,6 +37,8 @@ export default function Home() {
   const [currentActivity, setCurrentActivity] = useState(0);
   const [currentImage, setCurrentImage] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dashInputRef = useRef<HTMLInputElement>(null);
   const [activeDot, setActiveDot] = useState(0);
 
   const handleScroll = () => {
@@ -165,7 +167,11 @@ export default function Home() {
   };
 
   const handleSearch = () => {
-    if (!searchInput.trim()) return;
+    if (!searchInput.trim()) {
+      inputRef.current?.focus();
+      dashInputRef.current?.focus();
+      return;
+    }
     window.history.pushState({ view: 'dashboard', area: searchInput }, '', '');
     fetchSummary(searchInput);
   };
@@ -244,6 +250,7 @@ export default function Home() {
             >
               <MapPin className="text-white/70 ml-4 w-6 h-6" />
               <input 
+                ref={inputRef}
                 type="text" 
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
@@ -273,13 +280,13 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <button onClick={() => {setSearchInput('Dubai'); fetchSummary('Dubai');}} className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-colors border border-white/10">
+              <button onClick={() => {setSearchInput('Dubai'); window.history.pushState({ view: 'dashboard', area: 'Dubai' }, '', ''); fetchSummary('Dubai');}} className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-colors border border-white/10">
                 {t('hero.chips.malls')}
               </button>
-              <button onClick={() => {setSearchInput('Paris'); fetchSummary('Paris');}} className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-colors border border-white/10">
+              <button onClick={() => {setSearchInput('Paris'); window.history.pushState({ view: 'dashboard', area: 'Paris' }, '', ''); fetchSummary('Paris');}} className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-colors border border-white/10">
                 {t('hero.chips.cafes')}
               </button>
-              <button onClick={() => {setSearchInput('Miami'); fetchSummary('Miami');}} className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-colors border border-white/10">
+              <button onClick={() => {setSearchInput('Miami'); window.history.pushState({ view: 'dashboard', area: 'Miami' }, '', ''); fetchSummary('Miami');}} className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium backdrop-blur-md transition-colors border border-white/10">
                 {t('hero.chips.clubs')}
               </button>
               <button
@@ -315,6 +322,17 @@ export default function Home() {
               className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 relative z-10"
             >
               <div className="text-center mb-10">
+                <button 
+                  onClick={() => {
+                    setSearchedArea('');
+                    setSummary('');
+                    setSearchInput('');
+                    window.history.pushState({}, '', '/');
+                  }}
+                  className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-accent transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Back to Home
+                </button>
                 <h1 className="text-3xl md:text-5xl font-sora font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-fuchsia-500 to-accent">
                   {t('dash.uncover') || "Uncover the Best of the Neighborhood"}
                 </h1>
@@ -324,6 +342,7 @@ export default function Home() {
               <div className="flex items-center bg-black/40 dark:bg-black/60 backdrop-blur-xl border border-gray-300 dark:border-white/10 rounded-full p-2 shadow-2xl mx-auto max-w-2xl group focus-within:border-accent/50 focus-within:shadow-[0_0_20px_rgba(255,111,97,0.2)] transition-all">
                 <Search className="text-gray-500 dark:text-gray-400 ml-4 w-5 h-5" />
                 <input 
+                  ref={dashInputRef}
                   type="text" 
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
